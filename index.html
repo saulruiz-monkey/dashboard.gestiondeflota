@@ -111,6 +111,44 @@ tbody td{padding:10px 14px;font-size:13px}
 
 .footer{text-align:center;padding:22px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:16px}
 @media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}.chart-full{grid-column:auto}.main{padding:20px 16px}.filter-bar{padding:12px 16px}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:min(560px,92vw);max-height:80vh;display:flex;flex-direction:column;transform:translateY(16px);transition:transform .2s;overflow:hidden}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h3{font-size:14px;font-weight:800;letter-spacing:.04em}
+.modal-close{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{border-color:var(--accent3);color:var(--accent3)}
+.modal-body{padding:16px 24px 24px;overflow-y:auto;flex:1}
+.modal-kpi-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.modal-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px}
+.modal-kpi .mk-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.modal-kpi .mk-val{font-size:18px;font-weight:800}
+.modal-list{display:flex;flex-direction:column;gap:6px}
+.modal-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:12px;transition:border-color .15s;gap:8px}
+.modal-list-item:hover{border-color:var(--accent)}
+.modal-list-item .ml-left{display:flex;flex-direction:column;gap:2px}
+.modal-list-item .ml-name{font-weight:600}
+.modal-list-item .ml-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+.modal-list-item .ml-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);white-space:nowrap}
+.modal-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.modal-search:focus{border-color:var(--accent)}
+.kpi-card{cursor:pointer}
+.kpi-hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:6px;letter-spacing:.1em;opacity:.6}
+/* PROJECTION */
+.projection-bar{background:var(--surface);border:1px solid #00e5a033;border-radius:10px;padding:14px 20px;margin-bottom:20px;display:none;align-items:center;gap:16px;flex-wrap:wrap;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.projection-bar.visible{display:flex}
+.proj-icon{font-size:20px}
+.proj-text{flex:1}
+.proj-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--accent);text-transform:uppercase;margin-bottom:3px}
+.proj-detail{font-size:13px;font-weight:600}
+.proj-chips{display:flex;gap:8px;flex-wrap:wrap}
+.proj-chip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px}
+.proj-chip span{font-weight:700}
+.proj-chip.up span{color:#00e5a0}.proj-chip.down span{color:#ff6b35}.proj-chip.neu span{color:#0095ff}
 </style>
 </head>
 <body>
@@ -151,14 +189,15 @@ tbody td{padding:10px 14px;font-size:13px}
 <div class="main">
   <div class="section-label">Indicadores Clave</div>
   <div class="kpi-grid">
-    <div class="kpi-card"><div class="kpi-label">Monto Total</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">Item Total acumulado</div></div>
-    <div class="kpi-card"><div class="kpi-label">Promedio por Registro</div><div class="kpi-value" id="kpi-avg">—</div><div class="kpi-sub">Monto promedio MXN</div></div>
-    <div class="kpi-card"><div class="kpi-label">Clientes</div><div class="kpi-value" id="kpi-clientes">—</div><div class="kpi-sub">Nombres únicos activos</div></div>
-    <div class="kpi-card"><div class="kpi-label">Número total de Items</div><div class="kpi-value" id="kpi-registros">—</div><div class="kpi-sub">Líneas de detalle (filas reales)</div></div>
-    <div class="kpi-card"><div class="kpi-label">Invoices Únicos</div><div class="kpi-value" id="kpi-facturas">—</div><div class="kpi-sub">Invoice Numbers distintos</div></div>
+    <div class="kpi-card" onclick="openModal('total')"><div class="kpi-label">Monto Total</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">Item Total acumulado</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
+    <div class="kpi-card" onclick="openModal('promedio')"><div class="kpi-label">Promedio por Registro</div><div class="kpi-value" id="kpi-avg">—</div><div class="kpi-sub">Monto promedio MXN</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
+    <div class="kpi-card" onclick="openModal('clientes')"><div class="kpi-label">Clientes</div><div class="kpi-value" id="kpi-clientes">—</div><div class="kpi-sub">Nombres únicos activos</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
+    <div class="kpi-card" onclick="openModal('items')"><div class="kpi-label">Número total de Items</div><div class="kpi-value" id="kpi-registros">—</div><div class="kpi-sub">Líneas de detalle (filas reales)</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
+    <div class="kpi-card" onclick="openModal('facturas')"><div class="kpi-label">Invoices Únicos</div><div class="kpi-value" id="kpi-facturas">—</div><div class="kpi-sub">Invoice Numbers distintos</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
   </div>
 
   <div class="section-label">Tendencia & Desglose</div>
+  <div class="projection-bar" id="projectionBar"><div class="proj-icon">📈</div><div class="proj-text"><div class="proj-title" id="projTitle">Proyección</div><div class="proj-detail" id="projDetail"></div></div><div class="proj-chips" id="projChips"></div></div>
   <div class="charts-grid">
     <div class="chart-card chart-full">
       <div class="chart-title">Monto Total por Mes</div>
@@ -399,8 +438,10 @@ function renderCharts(data){
   document.getElementById('kpi-registros').textContent=agg.totalCount.toLocaleString('es-MX');
   document.getElementById('kpi-facturas').textContent=RAW.kpis_real.facturas.toLocaleString('es-MX');
 
+  _lastAgg = agg;
   // badge
   document.getElementById('filterBadge').classList.toggle('visible',!!isFiltered());
+  updateProjection();
 
   // Month chart
   const monthLabels=filteredMeses.map(m=>m.replace('20',''));
@@ -567,8 +608,245 @@ function applyFilters(){
   renderPivot();
 }
 
+
+// ===================== MODAL =====================
+let _lastAgg = null;
+const origRenderCharts = renderCharts;
+
+function openModal(type) {
+  if (!_lastAgg) return;
+  const agg = _lastAgg;
+  const fmt2 = v => '$' + v.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const overlay = document.getElementById('modalOverlay');
+  const body = document.getElementById('modalBody');
+  const title = document.getElementById('modalTitle');
+  overlay.classList.add('open');
+
+  if (type === 'clientes') {
+    title.textContent = 'Clientes Activos';
+    const rows = Object.entries(agg.byClient)
+      .map(([c,v]) => ({name:c, tipo:agg.clientTipo[c]||'', total:v.total, count:v.count}))
+      .sort((a,b) => b.total - a.total);
+    const bc = TIPO_BADGE;
+    body.innerHTML = `
+      <div class="modal-kpi-row">
+        <div class="modal-kpi"><div class="mk-label">Clientes</div><div class="mk-val" style="color:var(--accent3)">${rows.length}</div></div>
+        <div class="modal-kpi"><div class="mk-label">Total facturado</div><div class="mk-val" style="color:var(--accent)">${fmtM(rows.reduce((a,r)=>a+r.total,0))}</div></div>
+      </div>
+      <input class="modal-search" placeholder="Buscar cliente..." oninput="filterModalList(this.value, 'cliente-list')">
+      <div class="modal-list" id="cliente-list">
+        ${rows.map((r,i) => `
+          <div class="modal-list-item">
+            <div class="ml-left">
+              <div class="ml-name">${i+1}. ${r.name}</div>
+              <div class="ml-sub"><span class="badge ${bc[r.tipo]||'b-sin'}">${r.tipo||'Sin clasificar'}</span> · ${r.count.toLocaleString('es-MX')} registros</div>
+            </div>
+            <div class="ml-val">${fmtM(r.total)}</div>
+          </div>`).join('')}
+      </div>`;
+
+  } else if (type === 'total') {
+    title.textContent = 'Desglose del Monto Total';
+    const byTipo = {};
+    RAW.clientes_info.forEach(ci => { byTipo[ci.tipo] = byTipo[ci.tipo] || {total:0,clientes:0}; byTipo[ci.tipo].clientes++; });
+    Object.entries(agg.byClient).forEach(([c,v]) => {
+      const t = agg.clientTipo[c] || 'Sin clasificar';
+      if (!byTipo[t]) byTipo[t] = {total:0,clientes:0};
+      byTipo[t].total = (byTipo[t].total||0) + v.total;
+    });
+    const tipoRows = Object.entries(byTipo).filter(([,v])=>v.total>0).sort((a,b)=>b[1].total-a[1].total);
+    const grandT = Object.values(agg.byClient).reduce((a,b)=>a+b.total,0);
+    body.innerHTML = `
+      <div class="modal-kpi-row">
+        <div class="modal-kpi"><div class="mk-label">Gran Total</div><div class="mk-val" style="color:var(--accent)">${fmtM(grandT)}</div></div>
+        <div class="modal-kpi"><div class="mk-label">Tipos</div><div class="mk-val" style="color:var(--accent2)">${tipoRows.length}</div></div>
+      </div>
+      <div class="modal-list">
+        ${tipoRows.map(([tipo,v]) => {
+          const pct = grandT ? (v.total/grandT*100).toFixed(1) : 0;
+          const bc2 = TIPO_BADGE[tipo]||'b-sin';
+          return `<div class="modal-list-item">
+            <div class="ml-left">
+              <div class="ml-name"><span class="badge ${bc2}">${tipo}</span></div>
+              <div class="ml-sub">${pct}% del total</div>
+            </div>
+            <div class="ml-val">${fmtM(v.total)}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+  } else if (type === 'promedio') {
+    title.textContent = 'Promedios por Cliente';
+    const rows = Object.entries(agg.byClient)
+      .map(([c,v]) => ({name:c, tipo:agg.clientTipo[c]||'', avg:v.promedio, count:v.count}))
+      .sort((a,b) => b.avg - a.avg);
+    const overallAvg = Object.values(agg.byClient).reduce((s,v)=>s+v.total,0) /
+                       Math.max(1, Object.values(agg.byClient).reduce((s,v)=>s+v.count,0));
+    body.innerHTML = `
+      <div class="modal-kpi-row">
+        <div class="modal-kpi"><div class="mk-label">Promedio global</div><div class="mk-val" style="color:var(--accent2)">${fmt(overallAvg)}</div></div>
+        <div class="modal-kpi"><div class="mk-label">Mayor promedio</div><div class="mk-val" style="color:var(--accent4)">${fmt(rows[0]?.avg||0)}</div></div>
+      </div>
+      <input class="modal-search" placeholder="Buscar cliente..." oninput="filterModalList(this.value, 'avg-list')">
+      <div class="modal-list" id="avg-list">
+        ${rows.map((r,i) => `
+          <div class="modal-list-item">
+            <div class="ml-left">
+              <div class="ml-name">${i+1}. ${r.name}</div>
+              <div class="ml-sub"><span class="badge ${TIPO_BADGE[r.tipo]||'b-sin'}">${r.tipo||'Sin clasificar'}</span> · ${r.count.toLocaleString('es-MX')} registros</div>
+            </div>
+            <div class="ml-val">${fmt(r.avg)}</div>
+          </div>`).join('')}
+      </div>`;
+
+  } else if (type === 'items') {
+    title.textContent = 'Items por Tipo de Servicio';
+    const rows = RAW.item_stats.filter(r => agg.byItem[r.item]);
+    const totalItems = Object.values(agg.byItem).reduce((s,v)=>s+(v.count||0),0);
+    body.innerHTML = `
+      <div class="modal-kpi-row">
+        <div class="modal-kpi"><div class="mk-label">Total registros</div><div class="mk-val" style="color:var(--accent3)">${totalItems.toLocaleString('es-MX')}</div></div>
+        <div class="modal-kpi"><div class="mk-label">Tipos distintos</div><div class="mk-val" style="color:var(--accent4)">${Object.keys(agg.byItem).length}</div></div>
+      </div>
+      <div class="modal-list">
+        ${Object.entries(agg.byItem).sort((a,b)=>b[1].total-a[1].total).map(([item,v],i) => {
+          const color = COLORS[ALL_ITEMS.indexOf(item)%COLORS.length];
+          const pct = totalItems ? ((v.count||0)/totalItems*100).toFixed(1) : 0;
+          return `<div class="modal-list-item">
+            <div class="ml-left">
+              <div class="ml-name"><span style="display:inline-block;width:8px;height:8px;background:${color};border-radius:2px;margin-right:6px"></span>${item}</div>
+              <div class="ml-sub">${(v.count||0).toLocaleString('es-MX')} registros · ${pct}% del volumen</div>
+            </div>
+            <div class="ml-val">${fmtM(v.total)}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+  } else if (type === 'facturas') {
+    title.textContent = 'Resumen de Invoices';
+    const byMes = {};
+    RAW.pivot.forEach(r => {
+      const f = getFilters();
+      if (f.tipo && r.tipo !== f.tipo) return;
+      if (r.mes < f.mesFrom || r.mes > f.mesTo) return;
+      if (f.item && r.item !== f.item) return;
+      byMes[r.mes] = (byMes[r.mes]||0) + r.total;
+    });
+    const mesRows = Object.entries(byMes).sort((a,b)=>a[0]>b[0]?1:-1);
+    body.innerHTML = `
+      <div class="modal-kpi-row">
+        <div class="modal-kpi"><div class="mk-label">Invoices únicos</div><div class="mk-val" style="color:var(--accent)">${RAW.kpis_real.facturas.toLocaleString('es-MX')}</div></div>
+        <div class="modal-kpi"><div class="mk-label">Meses con datos</div><div class="mk-val" style="color:var(--accent2)">${mesRows.length}</div></div>
+      </div>
+      <div class="modal-list">
+        ${mesRows.map(([mes,total]) => `
+          <div class="modal-list-item">
+            <div class="ml-left"><div class="ml-name">${mes}</div></div>
+            <div class="ml-val">${fmtM(total)}</div>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+function filterModalList(q, listId) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  list.querySelectorAll('.modal-list-item').forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalBtn(); }
+function closeModalBtn() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+
+// ===================== PROJECTION =====================
+function updateProjection() {
+  const f = getFilters();
+  const mesFrom = f.mesFrom || ALL_MESES[0];
+  const mesTo = f.mesTo || ALL_MESES[ALL_MESES.length-1];
+  const bar = document.getElementById('projectionBar');
+
+  // Only show projection when a specific month range is selected (not all)
+  const isFiltered = mesFrom !== ALL_MESES[0] || mesTo !== ALL_MESES[ALL_MESES.length-1];
+  if (!isFiltered || mesFrom === mesTo) {
+    // Single month selected — project based on previous month
+    if (mesFrom === mesTo) {
+      const idx = ALL_MESES.indexOf(mesFrom);
+      if (idx > 0) {
+        const prevMes = ALL_MESES[idx - 1];
+        const prevTotal = RAW.month_stats.find(m => m.mes === prevMes)?.total || 0;
+        const curTotal = RAW.month_stats.find(m => m.mes === mesFrom)?.total || 0;
+
+        if (prevTotal > 0) {
+          // Growth rate from last 3 months avg vs prev month
+          const last3 = ALL_MESES.slice(Math.max(0, idx-3), idx).map(m => RAW.month_stats.find(x=>x.mes===m)?.total||0);
+          const avg3 = last3.length ? last3.reduce((a,b)=>a+b,0)/last3.length : prevTotal;
+          const proj = avg3; // projected = 3-month avg
+          const diff = proj - prevTotal;
+          const pct = prevTotal ? ((diff/prevTotal)*100).toFixed(1) : 0;
+          const isUp = diff >= 0;
+
+          document.getElementById('projTitle').textContent = `Proyección para ${mesFrom} · Basada en promedio de ${last3.length} meses anteriores`;
+          document.getElementById('projDetail').textContent = `Mes anterior (${prevMes}): ${fmtM(prevTotal)} → Proyectado: ${fmtM(proj)}`;
+          document.getElementById('projChips').innerHTML = `
+            <div class="proj-chip ${isUp?'up':'down'}"><span>${isUp?'▲':'▼'} ${Math.abs(pct)}%</span> vs mes anterior</div>
+            <div class="proj-chip neu"><span>${fmtM(Math.abs(diff))}</span> diferencia estimada</div>
+            ${curTotal > 0 ? `<div class="proj-chip neu"><span>${fmtM(curTotal)}</span> facturado actual</div>` : ''}
+          `;
+          bar.classList.add('visible');
+          return;
+        }
+      }
+    }
+    bar.classList.remove('visible');
+    return;
+  }
+
+  // Range selected: show range summary + projection for next month after range
+  const lastMesInRange = mesTo;
+  const lastIdx = ALL_MESES.indexOf(lastMesInRange);
+  const nextMes = ALL_MESES[lastIdx + 1];
+
+  const mesInRange = ALL_MESES.filter(m => m >= mesFrom && m <= mesTo);
+  const totalsInRange = mesInRange.map(m => RAW.month_stats.find(x=>x.mes===m)?.total||0);
+  const avgRange = totalsInRange.length ? totalsInRange.reduce((a,b)=>a+b,0)/totalsInRange.length : 0;
+  const lastTotal = RAW.month_stats.find(m => m.mes === lastMesInRange)?.total || 0;
+
+  if (avgRange === 0) { bar.classList.remove('visible'); return; }
+
+  const proj = avgRange;
+  const diff = proj - lastTotal;
+  const pct = lastTotal ? ((diff/lastTotal)*100).toFixed(1) : 0;
+  const isUp = diff >= 0;
+
+  document.getElementById('projTitle').textContent = nextMes
+    ? `Proyección para ${nextMes} · Promedio del rango seleccionado`
+    : `Resumen del rango seleccionado`;
+  document.getElementById('projDetail').textContent = nextMes
+    ? `Promedio mensual del rango: ${fmtM(avgRange)} → Proyectado para ${nextMes}: ${fmtM(proj)}`
+    : `Promedio mensual del periodo: ${fmtM(avgRange)}`;
+  document.getElementById('projChips').innerHTML = `
+    <div class="proj-chip ${isUp?'up':'down'}"><span>${isUp?'▲':'▼'} ${Math.abs(pct)}%</span> vs último mes</div>
+    <div class="proj-chip neu"><span>${mesInRange.length}</span> meses en rango</div>
+    <div class="proj-chip neu"><span>${fmtM(totalsInRange.reduce((a,b)=>a+b,0))}</span> total periodo</div>
+  `;
+  bar.classList.add('visible');
+}
+
 // INIT
 applyFilters();
 </script>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Detalle</h3>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
 </body>
 </html>
