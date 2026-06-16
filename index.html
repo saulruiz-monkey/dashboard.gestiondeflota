@@ -561,6 +561,7 @@ function renderProgreso() {
   };
 
   const renderPendTable = (items) => {
+    items = items.filter(p => p.monto_est > 0);
     if (!items.length) return '<p style="color:var(--muted);font-size:12px;padding:8px">Sin pendientes ✅</p>';
     return `<table class="prog-table">
       <thead><tr>
