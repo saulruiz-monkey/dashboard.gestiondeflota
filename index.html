@@ -341,7 +341,7 @@ tr.row-inactivo .td-cliente { color: #e57373 !important; }
 
   <div class="section-label">Indicadores Clave</div>
   <div class="kpi-grid">
-    <div class="kpi-card" onclick="openModal('total')"><div class="kpi-label">Monto Total</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">Item Total acumulado</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
+    <div class="kpi-card" onclick="openModal('total')"><div class="kpi-label">Monto Total</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-sub">Facturación 2026 · Gestion de Flota</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
     <div class="kpi-card" onclick="openModal('promedio')"><div class="kpi-label">Promedio por Registro</div><div class="kpi-value" id="kpi-avg">—</div><div class="kpi-sub">Monto promedio MXN</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
     <div class="kpi-card" onclick="openModal('clientes')"><div class="kpi-label">Clientes</div><div class="kpi-value" id="kpi-clientes">—</div><div class="kpi-sub">Nombres únicos activos</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
     <div class="kpi-card" onclick="openModal('items')"><div class="kpi-label">Número total de Items</div><div class="kpi-value" id="kpi-registros">—</div><div class="kpi-sub">Líneas de detalle (filas reales)</div><div class="kpi-hint">▸ CLICK PARA DETALLE</div></div>
@@ -1732,7 +1732,8 @@ function renderCharts(data){
 
   // KPIs
   const nClientes=Object.keys(agg.byClient).length;
-  document.getElementById('kpi-total').textContent=fmtM(agg.totalSum);
+  const total2026=getFilteredPivot().filter(r=>r.mes&&r.mes.startsWith('2026')).reduce((s,r)=>s+(r.total||0),0);
+  document.getElementById('kpi-total').textContent=fmtM(total2026);
   document.getElementById('kpi-avg').textContent=agg.totalCount?fmt(agg.totalSum/agg.totalCount):'$0';
   document.getElementById('kpi-clientes').textContent=nClientes;
   document.getElementById('kpi-registros').textContent=agg.totalCount.toLocaleString('es-MX');
@@ -2935,13 +2936,42 @@ function renderInforme() {
 
 
 // INIT
-// Populate pivot tipo filter from RAW tipos
+
+// Populate main tipo filter
+const tipoSel = document.getElementById('filterTipo');
+ALL_TYPES.forEach(t => {
+  const o = document.createElement('option');
+  o.value = t; o.textContent = t;
+  tipoSel.appendChild(o);
+});
+
+// Populate mes selects
+const mesFromSel = document.getElementById('filterMesFrom');
+const mesTo_Sel  = document.getElementById('filterMesTo');
+ALL_MESES.forEach(m => {
+  const o1 = document.createElement('option'); o1.value = m; o1.textContent = m;
+  const o2 = document.createElement('option'); o2.value = m; o2.textContent = m;
+  mesFromSel.appendChild(o1); mesTo_Sel.appendChild(o2);
+});
+mesFromSel.value = ALL_MESES[0];
+mesTo_Sel.value  = ALL_MESES[ALL_MESES.length-1];
+
+// Populate item filter
+const itemSel = document.getElementById('filterItem');
+ALL_ITEMS.forEach(it => {
+  const o = document.createElement('option');
+  o.value = it; o.textContent = it;
+  itemSel.appendChild(o);
+});
+
+// Populate pivot tipo filter
 const pivotTipoSel = document.getElementById('pivotTipoFilter');
 RAW.tipos.forEach(t => {
   const o = document.createElement('option');
   o.value = t; o.textContent = t;
   pivotTipoSel.appendChild(o);
 });
+
 applyFilters();
 updateBillingTipos();
 renderBilling();
