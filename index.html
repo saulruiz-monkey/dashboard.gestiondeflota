@@ -548,6 +548,12 @@ const COLORS=['#60a5fa','#34d399','#f87171','#fbbf24','#a78bfa','#fb923c','#38bd
 const ALL_MESES = RAW.meses;
 const ALL_ITEMS = RAW.items;
 const ALL_TYPES = RAW.tipos;
+// Fallbacks para variables opcionales no generadas por el script
+if (typeof PROGRESO_DATA === 'undefined') var PROGRESO_DATA = {mes: ALL_MESES[ALL_MESES.length-1], saul:[], mariana:[], hoy:'', fin:'', ref_ini:'', ref_fin:'', total:0};
+if (typeof FOLIOS_DATA === 'undefined') var FOLIOS_DATA = {folios:[], resumen:{}};
+if (typeof MANT_COMP_DATA === 'undefined') var MANT_COMP_DATA = {};
+if (typeof METABASE_DATA === 'undefined') var METABASE_DATA = {};
+if (typeof INFORME_DATA === 'undefined') var INFORME_DATA = {pendientes:[], total:0};
 
 
 function showResponsable(e, el) {
