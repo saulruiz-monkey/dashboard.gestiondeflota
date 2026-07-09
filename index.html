@@ -554,6 +554,9 @@ if (typeof FOLIOS_DATA === 'undefined') var FOLIOS_DATA = {folios:[], resumen:{}
 if (typeof MANT_COMP_DATA === 'undefined') var MANT_COMP_DATA = {};
 if (typeof METABASE_DATA === 'undefined') var METABASE_DATA = {};
 if (typeof INFORME_DATA === 'undefined') var INFORME_DATA = {pendientes:[], total:0};
+// Funciones globales de formato usadas por renderCharts y otros
+function fmtM(v){return '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmt(v){return v!=null?v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}):'0';}
 
 
 function showResponsable(e, el) {
