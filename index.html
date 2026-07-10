@@ -557,6 +557,12 @@ if (typeof INFORME_DATA === 'undefined') var INFORME_DATA = {pendientes:[], tota
 // Funciones globales de formato usadas por renderCharts y otros
 function fmtM(v){return '$'+v.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function fmt(v){return v!=null?v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}):'0';}
+// Constantes estáticas del dashboard (recuperadas)
+const ALL_CLIENTS = RAW.clientes_info.map(c=>c.cliente);
+const CLIENTES_INACTIVOS = new Set(["Avanser","BIG500","Easy Lease","Global Armor","PR77","Qiora","Tulps Total","Enerflex","Aksi Herramientas","Mormex","Autotanques Torres","Justin Stoyko"]);
+const RESPONSABLES={'ABR':'Mariana','Agua Optima':'Mariana','Aktiva Financiera':'Saúl','Adreco':'Mariana','Arrendadora AAG':'Saúl','Arrendadora Coppel':'Saúl','Beta Leasing':'Mariana','CHG':'Mariana','CSI':'Saúl','Casanova':'Saúl','Casofin':'Mariana','Cliente Nuevo':'Mariana','Conectabee':'Saúl','EYMSA':'Mariana','Fanafesa':'Mariana','Fibrum':'Saúl','Fintegra':'Saúl','Galeam':'Saúl','Grupo AMPM':'Saúl','Grupo Bafar':'Mariana','Grupo Bafar Tiendas':'Mariana','Grupo Batta':'Saúl','HEB':'Mariana','IAN':'Saúl','Jugos del Valle':'Mariana','Lumo Soluciones':'Saúl','Marsystems':'Saúl','Natgas':'Mariana','Pumping Team':'Mariana','Ragasa':'Mariana','SIPYT':'Saúl','Sin clasificar':'Mariana','Tiendas Neto':'Saúl','Transportes Ramag':'Saúl','URREA':'Mariana','Valtrum y Centrum':'Mariana'};
+const TIPO_BADGE={'Digital':'b-digital','Mantenimientos':'b-mantenimientos','Licencia':'b-licencia','Sin clasificar':'b-sin'};
+
 
 
 function showResponsable(e, el) {
